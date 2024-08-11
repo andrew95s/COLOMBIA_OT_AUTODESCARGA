@@ -95,6 +95,7 @@ def get_next_municipio(lock):
         if municipio:
             municipio = municipio[0]
             cursor.execute("DELETE FROM municipios_tab WHERE municipio = ?", (municipio,))
+            
             conn.commit()
             municipios_pendientes.value -= 1  # Decrementar el contador
             if municipios_pendientes.value == 0:
@@ -311,19 +312,50 @@ def process_cards(driver, descargas_dir, municipio, temp_dir):
     with open(informe_path, 'a', encoding='utf-8') as f:
         for archivo in archivos_no_procesados:
             f.write(f"{archivo}\n")
-            
+"""          
 def cargar_credenciales():
     with open('credentials.txt', 'r') as file:
         lines = file.readlines()
         email = lines[0].split(': ')[1].strip()
         password = lines[1].split(': ')[1].strip()
     return email, password
+"""
 
-def definir_workers():
-    with open('workers_ventanas.txt', 'r') as file:
+def cargar_credenciales():
+    # Obtiene la ruta absoluta del script que se está ejecutando
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Se mueve dos niveles arriba (fuera de la carpeta Scripts, a la raíz del proyecto)
+    #project_root = os.path.dirname(os.path.dirname(script_dir))
+
+    # Se mueve un nivel arriba (fuera de la carpeta Scripts)
+    project_root = os.path.dirname(script_dir)   
+    # Construye la ruta completa al archivo credentials.txt
+    credentials_file_path = os.path.join(project_root, 'credentials.txt')
+    
+    # Lee el archivo credentials.txt
+    with open(credentials_file_path, 'r') as file:
         lines = file.readlines()
-        workers = lines[0]
+        email = lines[0].split(': ')[1].strip()
+        password = lines[1].split(': ')[1].strip()
+    
+    return email, password
+def definir_workers():
+    # Obtiene la ruta absoluta del script que se está ejecutando
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Se mueve un nivel arriba (fuera de la carpeta Scripts)
+    project_root = os.path.dirname(script_dir)
+    
+    # Construye la ruta completa al archivo workers_ventanas.txt
+    workers_file_path = os.path.join(project_root, 'workers_ventanas.txt')
+    
+    # Lee el archivo workers_ventanas.txt
+    with open(workers_file_path, 'r') as file:
+        lines = file.readlines()
+        workers = lines[0].strip()
         print(f'Cantidad de Ventanas para Consultas: {workers} Ventanas/Workers')
+    
     return workers
 
 def process_municipio(process_id, lock, delay):

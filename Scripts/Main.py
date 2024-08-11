@@ -16,7 +16,6 @@ from PySide6.QtGui import QTextCursor, QColor, QPalette, QFont
 def find_project_root():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     while True:
-        # Buscar carpetas o archivos característicos de tu proyecto
         if os.path.exists(os.path.join(current_dir, 'Scripts')) and \
            os.path.exists(os.path.join(current_dir, 'db')) and \
            os.path.exists(os.path.join(current_dir, 'credentials.txt')):
@@ -39,10 +38,8 @@ class ConsoleRedirect(QObject):
 
     def write(self, text):
         try:
-            # Intenta decodificar como UTF-8
             decoded_text = text.encode('utf-8').decode('utf-8')
         except UnicodeEncodeError:
-            # Si falla, usa una codificación más permisiva
             decoded_text = text.encode('utf-8', errors='replace').decode('utf-8')
         self.buffer.write(decoded_text)
         if '\n' in decoded_text:
@@ -60,7 +57,6 @@ class ConsoleRedirect(QObject):
         self.text_widget.setTextCursor(cursor)
     
     def detach(self):
-        # Este método no hace nada, pero evita el error
         return None
 
 class WorkerSignals(QObject):
@@ -68,21 +64,12 @@ class WorkerSignals(QObject):
     error = Signal(str)
 
 class ScriptRunner(QRunnable):
-    def __init__(self, script_path):
+    def __init__(self, script_path, console_redirect):
         super().__init__()
         self.script_path = script_path
         self.signals = WorkerSignals()
         self.process = None
-
-    import signal
-import psutil
-
-class ScriptRunner(QRunnable):
-    def __init__(self, script_path):
-        super().__init__()
-        self.script_path = script_path
-        self.signals = WorkerSignals()
-        self.process = None
+        self.console_redirect = console_redirect
 
     def run(self):
         try:
@@ -99,7 +86,7 @@ class ScriptRunner(QRunnable):
                 if output == '' and self.process.poll() is not None:
                     break
                 if output:
-                    self.signals.finished.emit(output.strip())
+                    self.console_redirect.write(output)
             
             rc = self.process.poll()
             if rc != 0:
@@ -243,12 +230,8 @@ class MainWindow(QMainWindow):
         self.console_redirect = ConsoleRedirect(self.console_output)
         sys.stdout = self.console_redirect
         sys.stderr = self.console_redirect
-        # Configurar la codificación para sys.stdout y sys.stderr
-        sys.stdout = self.console_redirect
-        sys.stderr = self.console_redirect
 
-        # Rojo
-        self.kill_process_btn = self.create_button("Detener Proceso", "#6B0000")  # Rojo
+        self.kill_process_btn = self.create_button("Detener Proceso", "#6B0000")
         self.kill_process_btn.clicked.connect(self.kill_process)
         self.tab1_layout.addWidget(self.kill_process_btn)
         self.current_runner = None
@@ -304,12 +287,10 @@ class MainWindow(QMainWindow):
         return button
 
     def lighten_color(self, color):
-        # Función simple para aclarar el color para el efecto hover
         r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
         return f"#{min(255, r + 20):02x}{min(255, g + 20):02x}{min(255, b + 20):02x}"
 
     def darken_color(self, color):
-        # Función simple para oscurecer el color para el efecto pressed
         r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
         return f"#{max(0, r - 20):02x}{max(0, g - 20):02x}{max(0, b - 20):02x}"
     
@@ -409,7 +390,7 @@ class MainWindow(QMainWindow):
 
     def cargar_lista_municipios(self):
         script_path = os.path.join(PROJECT_ROOT, "Scripts", "consulta_db.py")
-        print(f"Ejecutando script: {script_path}")  # Mensaje de depuración
+        print(f"Ejecutando script: {script_path}")
         self.ejecutar_script(script_path)
 
     def inicializar_proceso(self):
@@ -418,7 +399,7 @@ class MainWindow(QMainWindow):
 
     def ejecutar_script(self, script_path):
         if os.path.exists(script_path):
-            self.current_runner = ScriptRunner(script_path)
+            self.current_runner = ScriptRunner(script_path, self.console_redirect)
             self.current_runner.signals.finished.connect(self.on_script_finished)
             self.current_runner.signals.error.connect(self.on_script_error)
             self.threadpool.start(self.current_runner)
@@ -436,25 +417,12 @@ class MainWindow(QMainWindow):
 
     @Slot(str)
     def on_script_finished(self, output):
-        try:
-            decoded_output = output.encode('utf-8').decode('utf-8')
-        except UnicodeEncodeError:
-            decoded_output = output.encode('utf-8', errors='replace').decode('utf-8')
-        print(decoded_output)
-        self.console_output.append(decoded_output)
-        self.console_output.ensureCursorVisible()
         self.load_data()
 
     @Slot(str)
     def on_script_error(self, error_msg):
-        try:
-            decoded_error = error_msg.encode('utf-8').decode('utf-8')
-        except UnicodeEncodeError:
-            decoded_error = error_msg.encode('utf-8', errors='replace').decode('utf-8')
-        print(f"Error: {decoded_error}", file=sys.stderr)
-        self.console_output.append(f"Error: {decoded_error}")
-        self.console_output.ensureCursorVisible()
-        QMessageBox.critical(self, "Error", f"Error al ejecutar el script: {decoded_error}")
+        self.console_redirect.write(f"Error: {error_msg}\n")
+        QMessageBox.critical(self, "Error", f"Error al ejecutar el script: {error_msg}")
 
     def guardar_numero(self, numero):
         numero_path = os.path.join(PROJECT_ROOT, "workers_ventanas.txt")
