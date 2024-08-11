@@ -3,7 +3,7 @@ REM Activar el entorno virtual
 call venv\Scripts\activate
 
 REM Ejecutar el script Python
-python Scripts\Main.py
+python Scripts\Script_OT.py
 
 REM Mensaje final
 echo Ejecución completada.

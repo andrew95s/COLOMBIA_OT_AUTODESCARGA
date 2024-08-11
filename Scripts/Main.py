@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+import sys
 import os
 import io
-import sys
 import codecs
 import signal
 import psutil
@@ -392,10 +392,25 @@ class MainWindow(QMainWindow):
         script_path = os.path.join(PROJECT_ROOT, "Scripts", "consulta_db.py")
         print(f"Ejecutando script: {script_path}")
         self.ejecutar_script(script_path)
-
+    """
     def inicializar_proceso(self):
         script_path = os.path.join(PROJECT_ROOT, "Scripts", "Script_OT.py")
         self.ejecutar_script(script_path)
+        """
+    def inicializar_proceso(self):
+        bat_path = os.path.join(PROJECT_ROOT, "co.bat")
+        self.ejecutar_bat(bat_path)
+
+    def ejecutar_bat(self, bat_path):
+        if os.path.exists(bat_path):
+            try:
+                # Ejecutar el archivo .bat de manera visible
+                subprocess.Popen(["cmd", "/c", "start", "cmd", "/k", bat_path], shell=True)
+                print(f"Ejecutando archivo .bat: {bat_path}")
+            except Exception as e:
+                QMessageBox.warning(self, "Error", f"Error al ejecutar el archivo .bat: {str(e)}")
+        else:
+            QMessageBox.warning(self, "Error", f"No se encontró el archivo {bat_path}")
 
     def ejecutar_script(self, script_path):
         if os.path.exists(script_path):

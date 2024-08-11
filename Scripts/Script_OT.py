@@ -21,7 +21,7 @@ municipios_pendientes = multiprocessing.Value('i', 0)  # Contador compartido
 terminar_procesos = multiprocessing.Event()  # Evento para señalar la terminación
 
 def human_like_delay():
-    time.sleep(random.uniform(0.5, 2))
+    time.sleep(random.uniform(1.5, 4))
 
 def random_mouse_movement(driver):
     action = ActionChains(driver)
@@ -43,7 +43,13 @@ def setup_driver(download_path):
         "download.default_directory": download_path,
         "download.prompt_for_download": False,
         "download.directory_upgrade": True,
-        "plugins.always_open_pdf_externally": True
+        "plugins.always_open_pdf_externally": True,
+        "credentials_enable_service": False,
+        "profile.password_manager_enabled": False,
+        "profile.default_content_setting_values.notifications": 2,
+        "profile.default_content_setting_values.popups": 2,
+        "profile.default_content_setting_values.geolocation": 2,
+        
     }
     options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(options=options)
@@ -53,24 +59,24 @@ def setup_driver(download_path):
 def human_like_input(element, text):
     for char in text:
         element.send_keys(char)
-        time.sleep(random.uniform(0.05, 0.2))
+        time.sleep(random.uniform(0.05, 0.1))
 
 def iniciar_sesion(driver, usuario, contraseña):
     ventana_original = driver.current_window_handle
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/a"))).click()
+    WebDriverWait(driver, 25).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div[3]/a"))).click()
     human_like_delay()
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "loginBtn"))).click()
+    WebDriverWait(driver, 25).until(EC.element_to_be_clickable((By.ID, "loginBtn"))).click()
     human_like_delay()
-    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[5]/div/div/div[2]/div[1]/div/div/div[1]/form/ul/li[4]/button"))).click()
+    WebDriverWait(driver, 25).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[5]/div/div/div[2]/div[1]/div/div/div[1]/form/ul/li[4]/button"))).click()
     human_like_delay()
     driver.switch_to.window(driver.window_handles[-1])
 
-    email_input = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "loginfmt")))
+    email_input = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.NAME, "loginfmt")))
     human_like_input(email_input, usuario)
     email_input.send_keys(Keys.RETURN)
     human_like_delay()
 
-    password_input = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "passwd")))
+    password_input = WebDriverWait(driver, 25).until(EC.presence_of_element_located((By.NAME, "passwd")))
     human_like_input(password_input, contraseña)
     password_input.send_keys(Keys.RETURN)
     human_like_delay()
@@ -235,7 +241,7 @@ def process_cards(driver, descargas_dir, municipio, temp_dir):
             view_button.click()
 
             max_wait = 7200  # 2 horas de espera máxima
-            check_interval = 10  # Verificar cada 10 segundos
+            check_interval = 120  # Verificar cada 10 segundos
             start_time = time.time()
             downloaded_file = None
 
