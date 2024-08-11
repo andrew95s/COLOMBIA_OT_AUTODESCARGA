@@ -1,0 +1,17 @@
+# Ignorar archivos de Python compilados
+*.pyc
+__pycache__/
+
+# Ignorar archivos de entorno virtual
+venv/
+.env
+
+# Ignorar archivos de configuración local
+.vscode/
+.idea/
+
+COLOMBIA_OT_AUTODESCARGA.zip
+
+cookies.pkl
+
+geckodriver.log

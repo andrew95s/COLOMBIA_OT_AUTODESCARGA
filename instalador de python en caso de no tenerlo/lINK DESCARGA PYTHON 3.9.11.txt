@@ -1,0 +1,7 @@
+PUEDES DESCARGAR DIRECTAMENTE EL PYTHON 3.9.11 DIRECTAMENTE EL LINK
+
+https://www.python.org/ftp/python/3.9.11/python-3.9.11-amd64.exe
+
+O VISITAR LA WEB SI USAS OTRO S.O
+
+https://www.python.org/downloads/release/python-3911/

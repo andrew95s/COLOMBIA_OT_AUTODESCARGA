@@ -1,0 +1,5 @@
+openpyxl
+PySide6
+psutil
+selenium
+pandas
