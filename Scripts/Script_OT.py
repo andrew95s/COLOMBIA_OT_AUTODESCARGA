@@ -241,7 +241,7 @@ def process_cards(driver, descargas_dir, municipio, temp_dir):
             view_button.click()
 
             max_wait = 7200  # 2 horas de espera máxima
-            check_interval = 120  # Verificar cada 10 segundos
+            check_interval = 3  # Verificar cada 10 segundos
             start_time = time.time()
             downloaded_file = None
 
@@ -251,7 +251,9 @@ def process_cards(driver, descargas_dir, municipio, temp_dir):
                     if files:
                         downloaded_file = os.path.join(temp_dir, max(files, key=lambda f: os.path.getmtime(os.path.join(temp_dir, f))))
                         break
-                print(f"Esperando descarga para {title}... Tiempo transcurrido: {int(time.time() - start_time)} segundos")
+                tiempo_transcurrido= int(time.time() - start_time)
+                if tiempo_transcurrido == 120 or tiempo_transcurrido == 360 or tiempo_transcurrido == 3600:
+                    print(f"Esperando descarga para {title}... Tiempo transcurrido: {int(time.time() - start_time)} segundos")
                 time.sleep(check_interval)
 
             if downloaded_file:
